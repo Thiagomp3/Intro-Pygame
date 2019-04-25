@@ -58,6 +58,19 @@ class Player(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
 
+        #Verifica se soltou alguma tecla
+        if event.type == pygame.KEYUP:
+            #Dependendo da tecla, altera a velocidade
+            if event.key == pygame.K_LEFT:
+                player.speedx = 0
+            if event.key == pygame.K_RIGHT:
+                player.speedx = 0
+    
+    #Depois de processar os eventos
+    #Atualiza a acao de cada sprite
+    all_sprites.update()
+
+
 
 
 # Inicialização do Pygame.
