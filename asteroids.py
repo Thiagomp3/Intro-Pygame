@@ -2,9 +2,9 @@
 
 # Importando as bibliotecas necessárias.
 import pygame
-from os import path
 import random
 import time
+from os import path
 
 # Estabelece a pasta que contem as figuras e sons.
 img_dir = path.join(path.dirname(__file__), 'img')
@@ -23,48 +23,48 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 
-#Classe Jogador que representa a nave
+# Classe Jogador que representa a nave
 class Player(pygame.sprite.Sprite):
-
-    #Construtor da classe
+    
+    # Construtor da classe.
     def __init__(self):
-
-        #Construtor da classe pai(Sprite)
+        
+        # Construtor da classe pai (Sprite).
         pygame.sprite.Sprite.__init__(self)
         
-        #Carregando a imagem de fundo
-        player_img = pygame.image.load(path.join(img_dir, "playerShip1_orange.png"))
+        # Carregando a imagem de fundo.
+        player_img = pygame.image.load(path.join(img_dir, "playerShip1_orange.png")).convert()
         self.image = player_img
-
-        #Diminuindo o tamanho da imagem
-        self.image = pygame.transform.scale(player_img,(50,38))
-
-        #Deixando transparente
+        
+        # Diminuindo o tamanho da imagem.
+        self.image = pygame.transform.scale(player_img, (50, 38))
+        
+        # Deixando transparente.
         self.image.set_colorkey(BLACK)
-
-        #Detalhes sobre o posicionamento
+        
+        # Detalhes sobre o posicionamento.
         self.rect = self.image.get_rect()
-
-        #Centraliza embaixo da tela
+        
+        # Centraliza embaixo da tela.
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
-
-        #Velocidade da nave
+        
+        # Velocidade da nave
         self.speedx = 0
-
-        #Melhora a colisao estabelecendo um raio de um circulo
+        
+        # Melhora a colisão estabelecendo um raio de um circulo
         self.radius = 25
     
-    #Metodo que atualiza a posicao da navinha
-    def updat(self):
+    # Metodo que atualiza a posição da navinha
+    def update(self):
         self.rect.x += self.speedx
-
-        #Mantem dentro da tela
+        
+        # Mantem dentro da tela
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
         if self.rect.left < 0:
             self.rect.left = 0
-
+                    
 # Classe Mob que representa os meteoros
 class Mob(pygame.sprite.Sprite):
     
@@ -94,6 +94,9 @@ class Mob(pygame.sprite.Sprite):
         self.speedx = random.randrange(-3, 3)
         self.speedy = random.randrange(2, 9)
         
+        # Melhora a colisão estabelecendo um raio de um circulo
+        self.radius = int(self.rect.width * .85 / 2)
+        
     # Metodo que atualiza a posição da navinha
     def update(self):
         self.rect.x += self.speedx
@@ -105,6 +108,7 @@ class Mob(pygame.sprite.Sprite):
             self.rect.y = random.randrange(-100, -40)
             self.speedx = random.randrange(-3, 3)
             self.speedy = random.randrange(2, 9)
+            
 # Classe Bullet que representa os tiros
 class Bullet(pygame.sprite.Sprite):
     
@@ -137,7 +141,6 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.bottom < 0:
             self.kill()
 
-
 # Inicialização do Pygame.
 pygame.init()
 pygame.mixer.init()
@@ -155,29 +158,27 @@ clock = pygame.time.Clock()
 background = pygame.image.load(path.join(img_dir, 'starfield.png')).convert()
 background_rect = background.get_rect()
 
-#Carrega os sons do jogo
-pygame.mixer.music.load(path.join(snd_dir, "tgfcoder-FrozenJam-SeamlessLoop.ogg"))
+# Carrega os sons do jogo
+pygame.mixer.music.load(path.join(snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
 pygame.mixer.music.set_volume(0.4)
 boom_sound = pygame.mixer.Sound(path.join(snd_dir, 'expl3.wav'))
 destroy_sound = pygame.mixer.Sound(path.join(snd_dir, 'expl6.wav'))
 pew_sound = pygame.mixer.Sound(path.join(snd_dir, 'pew.wav'))
 
-
-
-#Cria uma nave. O construtor será chamado automaticamente.
+# Cria uma nave. O construtor será chamado automaticamente.
 player = Player()
 
-#Cria um grupo de sprites e adiciona a nave
+# Cria um grupo de todos os sprites e adiciona a nave.
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 
-#Cria um grupo só dos meteoros
+# Cria um grupo só dos meteoros
 mobs = pygame.sprite.Group()
 
 # Cria um grupo para tiros
 bullets = pygame.sprite.Group()
 
-#Cria 8 meteoros e add no grupo meteoros
+# Cria 8 meteoros e adiciona no grupo meteoros
 for i in range(8):
     m = Mob()
     all_sprites.add(m)
@@ -187,6 +188,7 @@ for i in range(8):
 try:
     
     # Loop principal.
+    pygame.mixer.music.play(loops=-1)
     running = True
     while running:
         
@@ -196,28 +198,36 @@ try:
         # Processa os eventos (mouse, teclado, botão, etc).
         for event in pygame.event.get():
             
-            # Verifica se foi fechado
+            # Verifica se foi fechado.
             if event.type == pygame.QUIT:
                 running = False
-            # Verifica se apertou alguma tecla
+            
+            # Verifica se apertou alguma tecla.
             if event.type == pygame.KEYDOWN:
-                #Dependendo da tecla, altera a velocidade
+                # Dependendo da tecla, altera a velocidade.
                 if event.key == pygame.K_LEFT:
                     player.speedx = -8
                 if event.key == pygame.K_RIGHT:
                     player.speedx = 8
-            #Verifica se soltou alguma tecla
+                # Se for um espaço atira!
+                if event.key == pygame.K_SPACE:
+                    bullet = Bullet(player.rect.centerx, player.rect.top)
+                    all_sprites.add(bullet)
+                    bullets.add(bullet)
+                    pew_sound.play()
+                    
+            # Verifica se soltou alguma tecla.
             if event.type == pygame.KEYUP:
-                #Dependendo da tecla, altera a velocidade
+                # Dependendo da tecla, altera a velocidade.
                 if event.key == pygame.K_LEFT:
                     player.speedx = 0
                 if event.key == pygame.K_RIGHT:
                     player.speedx = 0
-
-        #Depois de processar os eventos
-        #Atualiza a acao de cada sprite
+                    
+        # Depois de processar os eventos.
+        # Atualiza a acao de cada sprite.
         all_sprites.update()
-
+        
         # Verifica se houve colisão entre tiro e meteoro
         hits = pygame.sprite.groupcollide(mobs, bullets, True, True)
         for hit in hits: # Pode haver mais de um
@@ -226,8 +236,7 @@ try:
             m = Mob() 
             all_sprites.add(m)
             mobs.add(m)
-
-
+        
         # Verifica se houve colisão entre nave e meteoro
         hits = pygame.sprite.spritecollide(player, mobs, False, pygame.sprite.collide_circle)
         if hits:
@@ -236,8 +245,7 @@ try:
             time.sleep(1) # Precisa esperar senão fecha
             
             running = False
-           
-
+    
         # A cada loop, redesenha o fundo e os sprites
         screen.fill(BLACK)
         screen.blit(background, background_rect)
@@ -247,4 +255,5 @@ try:
         pygame.display.flip()
         
 finally:
+    
     pygame.quit()
