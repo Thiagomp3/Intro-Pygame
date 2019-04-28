@@ -140,7 +140,17 @@ class Bullet(pygame.sprite.Sprite):
         # Se o tiro passar do inicio da tela, morre.
         if self.rect.bottom < 0:
             self.kill()
-
+#Carrega todos os assets uma vez só
+def load_assets(img_dir, snd_dir):
+    assets = {}
+    assets["player_img"] = pygame.image.load(path.join(img_dir, "playerShip1_orange.png")).convert()
+    assets["mob_img"] = pygame.image.load(path.join(img_dir, "meteoroBrown_med1.png")).convert()
+    assets["bullet_img"] = pygame.image.load(path.join(img_dir, "laserRed16.png")).convert()
+    assets["background"] = pygame.image.load(path.join(img_dir, "starfield.png")).convert()
+    assets["boom_sound"] = pygame.mixer.Sound(path.join(snd_dir, "exp13.wav"))
+    assets["destroy_sound"] = pygame.mixer.Sound(path.join(snd_dir, "exp16.wav"))
+    assets["pew_sound"] = pygame.mixer.Sound(path.join(snd_dir, "pew.wav"))
+    return assets 
 # Inicialização do Pygame.
 pygame.init()
 pygame.mixer.init()
@@ -150,6 +160,9 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Nome do jogo
 pygame.display.set_caption("Navinha")
+
+#Carrega todos os assets uma vez só e guarda em um dicionario
+assets = load_assets(img_dir, snd_dir)
 
 # Variável para o ajuste de velocidade
 clock = pygame.time.Clock()
